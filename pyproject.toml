@@ -1,0 +1,31 @@
+[project]
+name = "adk-samples"
+version = "0.1"
+description = "C-SAW Agents Template"
+readme = "README.md"
+requires-python = "~=3.12"
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "google-adk >= 1.2.1",
+    "praw>=7.8.1", #for Reddit Scout
+    "yfinance>=0.2.55", #for Stock Agent
+    "google-cloud-aiplatform[adk,agent-engines]>=1.96.0", #for deployment scripts
+    "nicegui>=2.16.0", #for web ui
+    "google-api-core>=2.24.2",
+]
+
+[tool.ruff.lint]
+extend-select = ["E", "W", "I"]
+ignore = ["E501", "W293", "E701", "E702"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-mock>=3.14.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
