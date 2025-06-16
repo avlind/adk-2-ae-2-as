@@ -1,19 +1,18 @@
 # **Disclaimer**
 > **Please be aware that the scripts and tools provided in this repository are offered "as-is" and for experimental/demonstration purposes. You use them at your own risk.**
 >
-> The Google Cloud Platform (GCP) APIs, particularly those related to Agent Engine and associated services, are subject to rapid changes and updates. While efforts are made to keep these samples current, **the functionality of the included deployment scripts and utilities is only tested and confirmed to work as of May 6, 2025.** Beyond this date, compatibility or functionality is not guaranteed without updates. Always refer to the official GCP documentation for the latest API specifications and best practices.
+> The Google Cloud Platform (GCP) APIs, particularly those related to Agent Engine and associated services, are subject to rapid changes and updates. While efforts are made to keep these samples current, **the functionality of the included deployment scripts and utilities is only tested and confirmed to work as of Jun 16, 2025.** Beyond this date, compatibility or functionality is not guaranteed without updates. Always refer to the official GCP documentation for the latest API specifications and best practices.
 
 # ADK Samples with Deployment Scripts
 
 
 
->This project uses `uv` for python package management. If you do not have `uv` installed locally, please see the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/).
+>This project uses `uv` for python package management. If you do not have `uv` installed locally, please see the [installation instructions](https://docs.astral.sh/uv/getting-started/installation/). If `uv` is not allowed in your organization or for your own use, I have included a `requirements.txt` file at the project level. You will need to modify any supplied `uv run` commands accordingly.
 
 >Some of the sample agents in this repo were duplicated or inspired from the public [ADK Samples Repo](https://github.com/google/adk-samples) or other previously shared assets. I claim **No CREDIT** for them. All credit is due to the talented engineers that created them. 
 
 ## Authors
 - Aaron Lind, avlind@
-    - [C-SAW](go/c-saw)
 
 ## Prerequisites
 - First time in the project you will need to run `uv sync` to build your venv from the uv.lock file.
@@ -84,7 +83,19 @@ For a visual approach to managing your ADK agents deployed to Agent Engine, this
     ```bash
     uv run webui_manager.py
     ```
+**Tab Descriptions:**
+
+| Tab Name  | Usage |
+| ------------- |:-------------:|
+| Deploy | Deploys local Agent to Agent Engine based on deployment_config.py |
+| Test | Simple Testing UI. Limitation: Only text-in, text-out supported at this time |
+| Destroy | Delete an Agent Engine from your GCP Project |
+| Manage AuthN | Configure OAuth Authorization for Agentspace, in order to use OAuth with Agent Engine hosted ADK agent. Only needed if ADK agent requires OAuth for its tools/functionality etc. |
+| Register | Register an ADK Agent on Agent Engine with an instance of Agentspace in your GCP Project |
+| Deregister | Deregister an ADK Agent on Agent Engine from an instance of Agentspace in your GCP Project |
+
 
 ## Known Limitations
 
 - Deployment scripts do not modify any GCP IAM permissions.
+- When using the "Test" tab, you cannot manuallly start a new session, you must reload the page to clear the current session and start a new one.

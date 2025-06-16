@@ -15,7 +15,6 @@
 from google.adk.agents import Agent
 from google.adk.tools import google_search
 
-# Must be named root_agent (for root agent, subagents can be different).
 root_agent = Agent(
     model="gemini-2.0-flash",
     name="search_agent",
