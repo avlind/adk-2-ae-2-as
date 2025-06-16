@@ -4,8 +4,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.tools_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.2.1",
-            "google-cloud-aiplatform[adk, agent_engines]==1.96.0",
+            "google-adk==1.3.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.97.0",
             "python-dotenv",
         ],
         "extra_packages": [
@@ -37,8 +37,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.basic_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.2.1",
-            "google-cloud-aiplatform[adk, agent_engines]==1.96.0",
+            "google-adk==1.3.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.97.0",
             "python-dotenv",
         ],
         "extra_packages": [
@@ -53,8 +53,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.loop_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.2.1",
-            "google-cloud-aiplatform[adk, agent_engines]==1.96.0",
+            "google-adk==1.3.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.97.0",
             "python-dotenv",
         ],
         "extra_packages": [
@@ -69,8 +69,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.search_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.2.1",
-            "google-cloud-aiplatform[adk, agent_engines]==1.96.0",
+            "google-adk==1.3.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.97.0",
             "python-dotenv",
         ],
         "extra_packages": [
@@ -85,8 +85,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.reddit_scout.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.2.1",
-            "google-cloud-aiplatform[adk, agent_engines]==1.96.0",
+            "google-adk==1.3.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.97.0",
             "python-dotenv",
             "praw",
         ],
