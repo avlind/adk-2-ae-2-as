@@ -6,10 +6,10 @@ readme = "README.md"
 requires-python = "~=3.12"
 dependencies = [
     "python-dotenv>=1.0.1",
-    "google-adk >= 1.2.1",
+    "google-adk >= 1.4.2",
     "praw>=7.8.1", #for Reddit Scout
     "yfinance>=0.2.55", #for Stock Agent
-    "google-cloud-aiplatform[adk,agent-engines]>=1.96.0", #for deployment scripts
+    "google-cloud-aiplatform[adk,agent-engines]>=1.98.0", #for deployment scripts
     "nicegui>=2.16.0", #for web ui
     "google-api-core>=2.24.2",
 ]

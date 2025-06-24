@@ -4,7 +4,7 @@
 
 The Reddit Scout Agent is designed to fetch the top posts from specified subreddits using the Reddit API. It leverages Google Cloud Secret Manager to securely store and access Reddit API credentials, providing a safe way to handle sensitive information.
 
-> Note: this example was inspired by [Chondashu's](https://github.com/chongdashu) public Github repo: [ADK Made Simple](https://github.com/chongdashu/adk-made-simple). I claim no direct ownership of the code.
+> Note: this example was inspired by [Chondashu's](https://github.com/chongdashu) public Github repo: [ADK Made Simple](https://github.com/chongdashu/adk-made-simple). I claim no direct ownership of the original idea.
 ## Features
 
 - Fetches top "hot" posts from one or more subreddits.
