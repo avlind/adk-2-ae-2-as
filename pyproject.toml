@@ -11,7 +11,7 @@ dependencies = [
     "yfinance>=0.2.55", #for Stock Agent
     "google-cloud-aiplatform[adk,agent-engines]>=1.98.0", #for deployment scripts
     "nicegui>=2.16.0", #for web ui
-    "google-api-core>=2.24.2",
+    "google-api-core>=2.24.2", #for web ui helpers
 ]
 
 [tool.ruff.lint]

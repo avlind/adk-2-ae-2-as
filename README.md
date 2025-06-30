@@ -99,3 +99,4 @@ For a visual approach to managing your ADK agents deployed to Agent Engine, this
 
 - Deployment scripts do not modify any GCP IAM permissions.
 - When using the "Test" tab, you cannot manuallly start a new session, you must reload the page to clear the current session and start a new one.
+- It is currently not supported to register an ADK on Agent Engine app to an Agentspace in a different project. This experimental feature requires explicit allowlisting by Agentspace engineering team.
