@@ -71,7 +71,7 @@ uv run adk web agents_gallery
 >**IMPORTANT**: Deployment scripts run under the context of the GCP Application Default Credentials. If you have not done so already, you must execute `gcloud auth application-default login` to establish the credentials for the deployment scripts.
 
 
-## Using the Web UI Manager for Agent Lifecycle Management
+## Using the "Agent Manager" for Agent Lifecycle Management
 For a visual approach to managing your ADK agents deployed to Agent Engine, this repo includes a Web UI (developed using the NiceGUI python project) to help with managing the lifecycle of agents.
 
 **General Guidance:**
