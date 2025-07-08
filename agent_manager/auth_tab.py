@@ -24,6 +24,7 @@ from agent_manager.helpers import (
     delete_authorization_sync_webui,
     get_access_token_and_credentials_async_webui,
     get_project_number,
+    list_authorizations_sync_webui,
 )
 
 logger = logging.getLogger("WebUIManagerActivity")
@@ -40,6 +41,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
             ).classes("text-sm text-gray-500 mb-3")
 
             with ui.tabs().classes("w-full") as auth_sub_tabs:
+                auth_list_tab_btn = ui.tab("List Existing Authorizations", icon="list")
                 auth_create_tab_btn = ui.tab(
                     "Create Authorization", icon="add_circle_outline"
                 )
@@ -48,7 +50,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                 )
 
             with ui.tab_panels(
-                auth_sub_tabs, value=auth_create_tab_btn
+                auth_sub_tabs, value=auth_list_tab_btn
             ).classes("w-full mt-4"):
                 with ui.tab_panel(auth_create_tab_btn):
                     with ui.column().classes("w-full gap-3"):
@@ -332,3 +334,113 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                         auth_delete_button_el.on_click(
                             _handle_delete_authorization
                         )
+                with ui.tab_panel(auth_list_tab_btn):
+                    with ui.column().classes("w-full gap-3"):
+                        auth_list_status_area = ui.column().classes(
+                            "w-full mt-3 p-3 border rounded bg-gray-50 dark:bg-gray-800 min-h-[60px]"
+                        )
+                        with auth_list_status_area:
+                            ui.label(
+                                "Click 'List Authorizations' to see all OAuth credentials."
+                            ).classes("text-sm text-gray-500")
+                        auth_list_button_el = ui.button(
+                            "List Authorizations", icon="refresh"
+                        )
+                        auth_list_results_area = ui.column().classes("w-full mt-4")
+
+                        async def _handle_list_authorizations():
+                            target_project_id = as_project_input.value
+                            if not target_project_id:
+                                ui.notify(
+                                    "Agentspace Project ID is required.",
+                                    type="warning",
+                                )
+                                return
+
+                            auth_list_button_el.disable()
+                            auth_list_results_area.clear()
+                            with auth_list_status_area:
+                                auth_list_status_area.clear()
+                                with ui.row().classes("items-center"):
+                                    ui.spinner(size="lg").classes("mr-2")
+                                    ui.label("Attempting to list authorizations...")
+
+                            (
+                                access_token,
+                                _,
+                                token_error,
+                            ) = await get_access_token_and_credentials_async_webui()
+                            if token_error or not access_token:
+                                with auth_list_status_area:
+                                    auth_list_status_area.clear()
+                                    ui.label(
+                                        f"Error getting access token: {token_error or 'Unknown error'}"
+                                    ).classes("text-red-600")
+                                ui.notify(
+                                    f"Access Token Error: {token_error or 'Unknown error'}",
+                                    type="negative",
+                                    multi_line=True,
+                                )
+                                auth_list_button_el.enable()
+                                return
+
+                            target_project_number = await get_project_number(
+                                target_project_id
+                            )
+                            if not target_project_number:
+                                with auth_list_status_area:
+                                    auth_list_status_area.clear()
+                                    ui.label(
+                                        f"Error getting project number for {target_project_id}."
+                                    ).classes("text-red-600")
+                                ui.notify(
+                                    f"Project Number Error for {target_project_id}.",
+                                    type="negative",
+                                    multi_line=True,
+                                )
+                                auth_list_button_el.enable()
+                                return
+
+                            success, result = await asyncio.to_thread(
+                                list_authorizations_sync_webui,
+                                target_project_id,
+                                target_project_number,
+                                access_token,
+                            )
+
+                            with auth_list_status_area:
+                                auth_list_status_area.clear()
+                                if success:
+                                    ui.label("Successfully listed authorizations.").classes("text-green-600")
+                                    if isinstance(result, list) and result:
+                                        with auth_list_results_area:
+                                            ui.table(columns=[
+                                                    {'name': 'name', 'label': 'Name', 'field': 'name', 'align': 'left', 'sortable': True},
+                                                    {'name': 'clientId', 'label': 'Client ID', 'field': 'clientId', 'align': 'left'},
+                                                    {'name': 'authUri', 'label': 'Auth URI', 'field': 'authUri', 'align': 'left'},
+                                                    {'name': 'tokenUri', 'label': 'Token URI', 'field': 'tokenUri', 'align': 'left'},
+                                                ],
+                                                rows=[
+                                                {
+                                                    'name': auth.get('name', '').split('/')[-1],
+                                                    'clientId': auth.get('serverSideOauth2', {}).get('clientId', 'N/A'),
+                                                    'authUri': auth.get('serverSideOauth2', {}).get('authorizationUri', 'N/A'),
+                                                    'tokenUri': auth.get('serverSideOauth2', {}).get('tokenUri', 'N/A'),
+                                                } for auth in result
+                                            ]).classes('w-full')
+                                    else:
+                                        with auth_list_results_area:
+                                            ui.label("No authorizations found.").classes("text-gray-500")
+
+                                else:
+                                    ui.html(
+                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{result}</pre>"
+                                    )
+                                    ui.notify(
+                                        "Failed to list authorizations.",
+                                        type="negative",
+                                        multi_line=True,
+                                    )
+                            auth_list_button_el.enable()
+
+                        auth_list_button_el.on_click(_handle_list_authorizations)

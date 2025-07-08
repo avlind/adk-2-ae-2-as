@@ -325,6 +325,51 @@ def delete_authorization_sync_webui(
         logger.error(msg)
         return False, msg
 
+
+def list_authorizations_sync_webui(
+    target_project_id: str,
+    target_project_number: str,
+    access_token: str,
+) -> tuple[bool, str | list]:
+    url = f"{AS_AUTH_API_BASE_URL}/projects/{target_project_number}/locations/{AS_AUTH_DEFAULT_LOCATION}/authorizations"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "X-Goog-User-Project": target_project_id,
+    }
+    try:
+        logger.info(
+            f"Attempting to list authorizations in project {target_project_id} (number: {target_project_number})"
+        )
+        log_headers = {
+            k: ("Bearer [token redacted]" if k == "Authorization" else v)
+            for k, v in headers.items()
+        }
+        logger.info(
+            f"LIST_AUTHORIZATIONS_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
+        )
+
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        response_json = response.json()
+        logger.info(
+            f"LIST_AUTHORIZATIONS_RESPONSE (Status {response.status_code}):\n{json.dumps(response_json, indent=2)}"
+        )
+        return True, response_json.get("authorizations", [])
+    except requests.exceptions.RequestException as e:
+        error_detail = (
+            f"Status: {e.response.status_code}, Body: {e.response.text}"
+            if e.response
+            else str(e)
+        )
+        msg = f"API call to list authorizations failed: {error_detail}"
+        logger.error(msg)
+        return False, msg
+    except Exception as e:
+        msg = f"An unexpected error occurred during authorization list: {e}\n{traceback.format_exc()}"
+        logger.error(msg)
+        return False, msg
+
 async def _fetch_vertex_ai_resources(
     ae_project_id: str,
     location: str,
