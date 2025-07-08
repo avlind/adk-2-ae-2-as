@@ -81,7 +81,7 @@ For a visual approach to managing your ADK agents deployed to Agent Engine, this
 3.  Launch the UI using the following command, which should launch on port 8080:
 
     ```bash
-    uv run webui_manager.py
+    uv run agent_manager.py
     ```
 **Tab Descriptions:**
 

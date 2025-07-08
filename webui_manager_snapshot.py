@@ -21,7 +21,6 @@ import importlib
 import json
 import logging  # Added for logging
 import os
-import re
 import sys
 import time
 import traceback
@@ -51,7 +50,7 @@ try:
     from deployment_utils.agentspace_lister import (
         get_agentspace_apps_from_projectid,  # Used for Register & Deregister
     )
-    from deployment_utils.constants import (
+    from agent_manager.constants import (
         SUPPORTED_REGIONS,
         WEBUI_AGENTDEPLOYMENT_HELPTEXT,
     )  # Import the help text
@@ -157,22 +156,20 @@ async def get_agent_root_nicegui(agent_config: dict) -> Tuple[Optional[Any], dic
     Also loads agent-specific .env variables into os.environ before import
     and returns them.
     """
-    module_path = agent_config.get("module_path")
-    var_name = agent_config.get("root_variable")
-    agent_loaded_env_vars: dict[str, str] = {}
+    module_path = agent_config.get("module_path", "")
+    var_name = agent_config.get("root_variable", "")
 
-    if not module_path or not var_name:
+    if not all([module_path, var_name]):
         error_msg = (
             "Agent configuration is missing 'module_path' or 'root_variable'.\n"
             f"Config provided: {agent_config}"
         )
         logger.error(f"Agent Import Error: {error_msg}")
-        return None, agent_loaded_env_vars, error_msg
+        return None, {}, error_msg
 
-    try:
-        print(f"Importing '{var_name}' from module '{module_path}'...")
-
-        # Load agent-specific .env variables *before* importing the module
+    def _blocking_import_and_load():
+        """Wraps file I/O and import logic to run in a thread."""
+        loaded_env_vars: dict[str, str] = {}
         env_file_relative_to_deploy_script = agent_config.get("local_env_file")
         if env_file_relative_to_deploy_script:
             env_file_relative_to_helpers = os.path.join("..", env_file_relative_to_deploy_script.lstrip("./"))
@@ -180,17 +177,27 @@ async def get_agent_root_nicegui(agent_config: dict) -> Tuple[Optional[Any], dic
             if loaded_vars:
                 logger.info(f"Updating deployment script's environment with {len(loaded_vars)} variables from agent's .env file.")
                 os.environ.update(loaded_vars)
-                agent_loaded_env_vars = loaded_vars # Store for returning
+                loaded_env_vars = loaded_vars
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         if script_dir not in sys.path: sys.path.insert(0, script_dir)
         parent_dir = os.path.dirname(script_dir)
         if parent_dir not in sys.path: sys.path.insert(0, parent_dir)
 
+        # Perform the actual import and attribute access
         agent_module = importlib.import_module(module_path)
         root_agent = getattr(agent_module, var_name)
+        return root_agent, loaded_env_vars
+
+    try:
+        print(f"Importing '{var_name}' from module '{module_path}'...")
+
+        # Run the blocking import/load logic in a background thread
+        root_agent, agent_loaded_env_vars = await asyncio.to_thread(_blocking_import_and_load)
+
         logger.info(f"Successfully imported root agent '{var_name}' from '{module_path}'.")
         return root_agent, agent_loaded_env_vars, None
+
     except ImportError:
         tb_str = traceback.format_exc()
         error_msg = (
@@ -199,18 +206,18 @@ async def get_agent_root_nicegui(agent_config: dict) -> Tuple[Optional[Any], dic
             f"Traceback: {tb_str}"
         )
         logger.error(f"Agent Import Error: {error_msg}")
-        return None, agent_loaded_env_vars, error_msg
+        return None, {}, error_msg
     except AttributeError:
         error_msg = (
             f"Module '{module_path}' does not have an attribute named '{var_name}'.\n"
             "Check 'root_variable' in deployment_configs.py."
         )
         logger.error(f"Agent Import Error: {error_msg}")
-        return None, agent_loaded_env_vars, error_msg
+        return None, {}, error_msg
     except Exception as e:
         error_msg = f"An unexpected error occurred during agent import: {e}\n{traceback.format_exc()}"
         logger.error(f"Agent Import Error: {error_msg}")
-        return None, agent_loaded_env_vars, error_msg
+        return None, {}, error_msg
 
 async def update_timer(start_time: float, timer_label: ui.label, stop_event: asyncio.Event, status_area: ui.element):
     """Updates the timer label every second until stop_event is set."""
@@ -477,8 +484,14 @@ async def _fetch_vertex_ai_resources(
 
     notification.message = f"Vertex AI initialized. Fetching {notify_prefix}..."
     try:
-        resources_generator = await asyncio.to_thread(resource_lister)
-        resources_list = list(resources_generator) # Convert generator to list
+        # The resource_lister function (e.g., agent_engines.list) returns a generator.
+        # Converting this generator to a list can involve multiple blocking I/O calls
+        # to fetch pages of results. This entire operation must be done in a thread
+        # to avoid blocking the main asyncio event loop.
+        def fetch_and_convert_to_list():
+            return list(resource_lister())
+
+        resources_list = await asyncio.to_thread(fetch_and_convert_to_list)
 
         notification.spinner = False # Stop spinner once fetched
         notification.message = f"Found {len(resources_list)} {notify_prefix.lower()}."
@@ -543,27 +556,40 @@ async def fetch_agents_for_destroy(
                 ui.label(f"No agent engines found in {ae_project_id}/{location}.")
             ui.notify("No agent engines found.", type="info")
         else:
-            with list_container:
-                page_state["destroy_agents"] = existing_agents
-                ui.label(f"{len(existing_agents)} Available Agent Engines:").classes("text-lg font-semibold mb-2")
-                for agent in existing_agents:
-                    resource_name = agent.resource_name
-                    create_time_str = agent.create_time.strftime('%Y-%m-%d %H:%M:%S %Z') if agent.create_time else "N/A"
-                    update_time_str = agent.update_time.strftime('%Y-%m-%d %H:%M:%S %Z') if agent.update_time else "N/A"
+            page_state["destroy_agents"] = existing_agents
+
+            def _prepare_destroy_list_details(agents_list):
+                """Pre-processes agent data in a thread-safe way."""
+                details = []
+                for agent in agents_list:
                     description_str = "No description."
                     if hasattr(agent, '_gca_resource') and hasattr(agent._gca_resource, 'description') and agent._gca_resource.description:
                         description_str = agent._gca_resource.description
+                    details.append({
+                        "resource_name": agent.resource_name,
+                        "display_name": agent.display_name,
+                        "description": description_str,
+                        "create_time": agent.create_time.strftime('%Y-%m-%d %H:%M:%S %Z') if agent.create_time else "N/A",
+                        "update_time": agent.update_time.strftime('%Y-%m-%d %H:%M:%S %Z') if agent.update_time else "N/A",
+                    })
+                return details
 
+            agent_details_list = await asyncio.to_thread(_prepare_destroy_list_details, existing_agents)
+
+            with list_container:
+                ui.label(f"{len(agent_details_list)} Available Agent Engines:").classes("text-lg font-semibold mb-2")
+                for agent_details in agent_details_list:
+                    resource_name = agent_details["resource_name"]
                     card = ui.card().classes("w-full mb-2 p-3")
                     with card:
                         with ui.row().classes("w-full items-center justify-between"):
-                            ui.label(f"{agent.display_name}").classes("text-lg font-medium")
+                            ui.label(f"{agent_details['display_name']}").classes("text-lg font-medium")
                         with ui.column().classes("gap-0 mt-1 text-sm text-gray-600 dark:text-gray-400"):
                             ui.label(f"Resource: {resource_name}")
-                            ui.label(f"Description: {description_str}")
+                            ui.label(f"Description: {agent_details['description']}")
                             with ui.row().classes("gap-4 items-center"):
-                                ui.label(f"Created: {create_time_str}")
-                                ui.label(f"Updated: {update_time_str}")
+                                ui.label(f"Created: {agent_details['create_time']}")
+                                ui.label(f"Updated: {agent_details['update_time']}")
                         checkbox = ui.checkbox("Select for Deletion")
                         checkbox.bind_value(page_state["destroy_selected"], resource_name)
                         checkbox.classes("absolute top-2 right-2")
@@ -696,18 +722,26 @@ async def fetch_agent_engines_for_register(
             logger.info(f"No deployed Agent Engines found in {ae_project_id}/{location} for registration.")
             select_element.set_options([])
         else:
-            options = {}
-            for agent in existing_agents:
-                create_time_str = agent.create_time.strftime('%Y-%m-%d %H:%M') if agent.create_time else "N/A"
-                update_time_str = agent.update_time.strftime('%Y-%m-%d %H:%M') if agent.update_time else "N/A"
-                display_text = (f"{agent.display_name} ({agent.resource_name.split('/')[-1]}) | "
-                                f"Created: {create_time_str} | Updated: {update_time_str}")
-                options[agent.resource_name] = display_text
+            def _create_register_options(agents_list):
+                """Prepares the options dictionary for the select dropdown in a background thread."""
+                options = {}
+                for agent in agents_list:
+                    create_time_str = agent.create_time.strftime('%Y-%m-%d %H:%M') if agent.create_time else "N/A"
+                    update_time_str = agent.update_time.strftime('%Y-%m-%d %H:%M') if agent.update_time else "N/A"
+                    display_text = (f"{agent.display_name} ({agent.resource_name.split('/')[-1]}) | "
+                                    f"Created: {create_time_str} | Updated: {update_time_str}")
+                    options[agent.resource_name] = display_text
+                return options
+
+            # Processing a large list of agents can block the UI. Run it in a thread.
+            options = await asyncio.to_thread(_create_register_options, existing_agents)
+
             select_element.set_options(options)
             logger.info(f"Found {len(existing_agents)} Agent Engines in {ae_project_id}/{location} for registration.")
             # Notification is handled by _fetch_vertex_ai_resources
 
         select_element.set_visibility(True)
+        fetch_button.enable() # Ensure button is enabled AFTER the select is populated
     fetch_button.enable() # Ensure button is enabled if no error but list is empty
 
 
@@ -885,7 +919,7 @@ async def main_page(client: Client):
                 # Username for Test Tab
                 with ui.card().classes("w-full p-4"):
                     ui.label("2. Set Username (for UI identification in test chat)").classes("text-lg font-semibold")
-                    test_username_input = ui.input(
+                    ui.input(
                         "Username",
                         value=page_state["test_username"],
                         on_change=lambda e: page_state.update({"test_username": e.value})
@@ -937,10 +971,14 @@ async def main_page(client: Client):
                         ui.notify("No deployed Agent Engines found for testing.", type="info")
                         test_agent_select.set_options([])
                     else:
-                        options = {
-                            agent.resource_name: f"{agent.display_name} ({agent.resource_name.split('/')[-1]})"
-                            for agent in existing_agents
-                        }
+                        def _create_test_options(agents_list):
+                            """Prepares the options dictionary for the test agent select dropdown."""
+                            return {
+                                agent.resource_name: f"{agent.display_name} ({agent.resource_name.split('/')[-1]})"
+                                for agent in agents_list
+                            }
+                        # Processing a large list can block the UI. Run it in a thread.
+                        options = await asyncio.to_thread(_create_test_options, existing_agents)
                         test_agent_select.set_options(options)
                         ui.notify(f"Found {len(existing_agents)} Agent Engines for testing.", type="positive")
                     test_agent_select.set_visibility(True)
