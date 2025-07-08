@@ -4,12 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-07-08
+### Added
+- New Feature: Can now list all OAuth Authorizations within the project and can select to delete one
+
+### Fixed
+- Refactored main agent_manager.py file, broken down into supporting modules, now located in the `agent_manager` directory.
+
 ## [0.3.0] - 2025-06-16
 ### Added
 - New Feature: Introduced Agent Engine Test tab.
 
 ### Fixed
-- Renamed the V2 Agentspace registration Tabs since legacy APIs have been removed from solution.
+- Renamed the V2 Agentspace registration tabs since legacy APIs have been removed from solution.
 
 ### Removed
 - Legacy registration of Agents with Agentspace tabs have been removed from UI.

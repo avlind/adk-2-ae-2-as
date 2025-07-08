@@ -33,24 +33,21 @@ logger = logging.getLogger("WebUIManagerActivity")
 def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> None:
     with ui.tab_panel("agentspace_auth"):
         with ui.column().classes("w-full p-4 gap-4"):
-            ui.label("Manage Agentspace OAuth Authentications").classes(
+            ui.label("Manage Agentspace OAuth Authorizations").classes(
                 "text-xl font-semibold"
             )
             ui.label(
-                f"Authorizations are managed at the '{AS_AUTH_DEFAULT_LOCATION}' location."
+                f"Authorizations are managed at the '{AS_AUTH_DEFAULT_LOCATION}' location and are collectively scoped project-wide."
             ).classes("text-sm text-gray-500 mb-3")
 
             with ui.tabs().classes("w-full") as auth_sub_tabs:
-                auth_list_tab_btn = ui.tab("List Existing Authorizations", icon="list")
+                auth_manage_tab_btn = ui.tab("Manage Authorizations", icon="list")
                 auth_create_tab_btn = ui.tab(
                     "Create Authorization", icon="add_circle_outline"
                 )
-                auth_delete_tab_btn = ui.tab(
-                    "Delete Authorization", icon="delete_outline"
-                )
 
             with ui.tab_panels(
-                auth_sub_tabs, value=auth_list_tab_btn
+                auth_sub_tabs, value=auth_manage_tab_btn
             ).classes("w-full mt-4"):
                 with ui.tab_panel(auth_create_tab_btn):
                     with ui.column().classes("w-full gap-3"):
@@ -197,144 +194,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                             _handle_create_authorization
                         )
 
-                with ui.tab_panel(auth_delete_tab_btn):
-                    with ui.column().classes("w-full gap-3"):
-                        auth_id_delete_input_el = ui.input(
-                            "Authorization ID to Delete",
-                            placeholder="e.g., my-google-oauth-client",
-                        ).props("outlined dense clearable").classes("w-full")
-                        auth_delete_status_area = ui.column().classes(
-                            "w-full mt-3 p-3 border rounded bg-gray-50 dark:bg-gray-800 min-h-[60px]"
-                        )
-                        with auth_delete_status_area:
-                            ui.label(
-                                "Enter Authorization ID and click 'Delete Authorization'."
-                            ).classes("text-sm text-gray-500")
-                        auth_delete_button_el = ui.button(
-                            "Delete Authorization",
-                            icon="delete_forever",
-                            color="red",
-                        )
-
-                        async def _run_actual_auth_deletion_webui(
-                            target_project_id: str, auth_id: str
-                        ):
-                            auth_delete_button_el.disable()
-                            with auth_delete_status_area:
-                                auth_delete_status_area.clear()
-                                with ui.row().classes("items-center"):
-                                    ui.spinner(size="lg").classes("mr-2")
-                                    ui.label(f"Attempting to delete '{auth_id}'...")
-
-                            (
-                                access_token,
-                                _,
-                                token_error,
-                            ) = await get_access_token_and_credentials_async_webui()
-                            if token_error or not access_token:
-                                with auth_delete_status_area:
-                                    auth_delete_status_area.clear()
-                                    ui.label(
-                                        f"Token Error: {token_error or 'Unknown'}"
-                                    ).classes("text-red-600")
-                                ui.notify(
-                                    f"Access Token Error: {token_error or 'Unknown'}",
-                                    type="negative",
-                                )
-                                auth_delete_button_el.enable()
-                                return
-
-                            target_project_number = await get_project_number(
-                                target_project_id
-                            )
-                            if not target_project_number:
-                                with auth_delete_status_area:
-                                    auth_delete_status_area.clear()
-                                    ui.label(
-                                        f"Project Number Error for {target_project_id}."
-                                    ).classes("text-red-600")
-                                ui.notify(
-                                    f"Project Number Error for {target_project_id}.",
-                                    type="negative",
-                                )
-                                auth_delete_button_el.enable()
-                                return
-
-                            (
-                                success,
-                                message,
-                            ) = await asyncio.to_thread(
-                                delete_authorization_sync_webui,
-                                target_project_id,
-                                target_project_number,
-                                auth_id,
-                                access_token,
-                            )
-                            with auth_delete_status_area:
-                                auth_delete_status_area.clear()
-                                if success:
-                                    ui.html(
-                                        f"<span class='text-green-600'>Success:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>"
-                                    )
-                                    ui.notify(
-                                        "Authorization deleted!", type="positive"
-                                    )
-                                    auth_id_delete_input_el.set_value("")
-                                else:
-                                    ui.html(
-                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>"
-                                    )
-                                    ui.notify(
-                                        "Deletion failed.",
-                                        type="negative",
-                                        multi_line=True,
-                                    )
-                            auth_delete_button_el.enable()
-
-                        async def _handle_delete_authorization():
-                            target_project_id = as_project_input.value
-                            auth_id = auth_id_delete_input_el.value
-
-                            if not all([target_project_id, auth_id]):
-                                ui.notify(
-                                    "Agentspace Project ID and Authorization ID are required for deletion.",
-                                    type="warning",
-                                )
-                                return
-
-                            with ui.dialog() as confirm_dialog, ui.card():
-                                ui.label(
-                                    f"Are you sure you want to delete authorization '{auth_id}' from project '{target_project_id}'?"
-                                ).classes("text-lg mb-2")
-                                ui.label(
-                                    "This action cannot be undone."
-                                ).classes("font-semibold text-red-600")
-                                with ui.row().classes(
-                                    "mt-5 w-full justify-end gap-2"
-                                ):
-                                    ui.button(
-                                        "Cancel",
-                                        on_click=confirm_dialog.close,
-                                        color="gray",
-                                    )
-                                    ui.button(
-                                        "Delete Permanently",
-                                        on_click=lambda: (
-                                            confirm_dialog.close(),
-                                            asyncio.create_task(
-                                                _run_actual_auth_deletion_webui(
-                                                    target_project_id, auth_id
-                                                )
-                                            ),
-                                        ),
-                                        color="red",
-                                    )
-                            await confirm_dialog
-
-                        auth_delete_button_el.on_click(
-                            _handle_delete_authorization
-                        )
-                with ui.tab_panel(auth_list_tab_btn):
+                with ui.tab_panel(auth_manage_tab_btn):
                     with ui.column().classes("w-full gap-3"):
                         auth_list_status_area = ui.column().classes(
                             "w-full mt-3 p-3 border rounded bg-gray-50 dark:bg-gray-800 min-h-[60px]"
@@ -414,20 +274,80 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                                     ui.label("Successfully listed authorizations.").classes("text-green-600")
                                     if isinstance(result, list) and result:
                                         with auth_list_results_area:
-                                            ui.table(columns=[
+
+                                            async def _run_actual_auth_deletion_webui(target_project_id: str, auth_id: str):
+                                                (
+                                                    access_token,
+                                                    _,
+                                                    token_error,
+                                                ) = await get_access_token_and_credentials_async_webui()
+                                                if token_error or not access_token:
+                                                    with auth_list_results_area:
+                                                        ui.notify(f"Access Token Error: {token_error or 'Unknown'}", type="negative")
+                                                    return
+
+                                                target_project_number = await get_project_number(target_project_id)
+                                                if not target_project_number:
+                                                    with auth_list_results_area:
+                                                        ui.notify(f"Project Number Error for {target_project_id}.", type="negative")
+                                                    return
+
+                                                (success, message) = await asyncio.to_thread(
+                                                    delete_authorization_sync_webui,
+                                                    target_project_id,
+                                                    target_project_number,
+                                                    auth_id,
+                                                    access_token,
+                                                )
+                                                if success:
+                                                    with auth_list_results_area:
+                                                        ui.notify("Authorization deleted!", type="positive")
+                                                        await _handle_list_authorizations() # Refresh list
+                                                else:
+                                                    with auth_list_results_area:
+                                                        ui.notify(f"Deletion failed: {message}", type="negative", multi_line=True)
+
+                                            async def show_delete_confirmation(auth_id: str):
+                                                target_project_id = as_project_input.value
+                                                with ui.dialog() as confirm_dialog, ui.card():
+                                                    ui.label(f"Are you sure you want to delete authorization '{auth_id}' from project '{target_project_id}'?").classes("text-lg mb-2")
+                                                    ui.label("This action cannot be undone.").classes("font-semibold text-red-600")
+                                                    with ui.row().classes("mt-5 w-full justify-end gap-2"):
+                                                        ui.button("Cancel", on_click=confirm_dialog.close, color="gray")
+                                                        ui.button(
+                                                            "Delete Permanently",
+                                                            on_click=lambda: (
+                                                                confirm_dialog.close(),
+                                                                asyncio.create_task(
+                                                                    _run_actual_auth_deletion_webui(target_project_id, auth_id)
+                                                                )
+                                                            ),
+                                                            color="red",
+                                                        )
+                                                await confirm_dialog
+
+                                            columns = [
                                                     {'name': 'name', 'label': 'Name', 'field': 'name', 'align': 'left', 'sortable': True},
                                                     {'name': 'clientId', 'label': 'Client ID', 'field': 'clientId', 'align': 'left'},
                                                     {'name': 'authUri', 'label': 'Auth URI', 'field': 'authUri', 'align': 'left'},
                                                     {'name': 'tokenUri', 'label': 'Token URI', 'field': 'tokenUri', 'align': 'left'},
-                                                ],
-                                                rows=[
+                                                    {'name': 'actions', 'label': 'Actions', 'field': 'actions', 'align': 'right'},
+                                                ]
+                                            rows = [
                                                 {
                                                     'name': auth.get('name', '').split('/')[-1],
                                                     'clientId': auth.get('serverSideOauth2', {}).get('clientId', 'N/A'),
                                                     'authUri': auth.get('serverSideOauth2', {}).get('authorizationUri', 'N/A'),
                                                     'tokenUri': auth.get('serverSideOauth2', {}).get('tokenUri', 'N/A'),
                                                 } for auth in result
-                                            ]).classes('w-full')
+                                            ]
+                                            auth_table = ui.table(columns=columns, rows=rows, row_key='name').classes('w-full')
+                                            auth_table.add_slot('body-cell-actions', '''
+                                                <q-td :props="props">
+                                                    <q-btn @click="$parent.$emit('delete', props.row.name)" icon="delete" color="red" flat dense round />
+                                                </q-td>
+                                            ''')
+                                            auth_table.on('delete', lambda e: show_delete_confirmation(e.args))
                                     else:
                                         with auth_list_results_area:
                                             ui.label("No authorizations found.").classes("text-gray-500")

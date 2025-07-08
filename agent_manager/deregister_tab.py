@@ -364,7 +364,7 @@ async def fetch_registered_agents_async(
     )
 
     if error_msg:
-        logger.error(f"Error fetching V2 registered agents: {error_msg}")
+        logger.error(f"Error fetching registered agents: {error_msg}")
         with list_container:
             ui.label(error_msg).classes("text-red-500")
         ui.notify(error_msg, type="negative", multi_line=True)
@@ -431,3 +431,4 @@ def populate_deregister_list(
                 f"Successfully fetched and filtered {len(adk_agents)} ADK agents.",
                 type="positive",
             )
+
