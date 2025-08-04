@@ -4,15 +4,17 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.tools_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.4.2",
-            "google-cloud-aiplatform[adk, agent_engines]==1.98.0",
+            "google-adk==1.9.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.106.0",
             "python-dotenv",
+            "google-cloud-secret-manager",
         ],
         "extra_packages": [
             "./agents_gallery/tools_agent",  # Path relative to where interactive_deploy.py is run
         ],
         "local_env_file": "./agents_gallery/tools_agent/.env", #leave empty if not used
         "ae_display_name": "Tools Demo Agent",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Tools Demo Agent",
         "description": "An agent demonstrating the use of various simple tools.",
         "as_tool_description": "An agent demonstrating the use of various simple tools.",
@@ -88,6 +90,7 @@ AGENT_CONFIGS = {
             "google-adk==1.4.2",
             "google-cloud-aiplatform[adk, agent_engines]==1.98.0",
             "python-dotenv",
+            "google-cloud-secret-manager",
             "praw",
         ],
         "extra_packages": [

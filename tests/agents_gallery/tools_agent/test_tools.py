@@ -13,7 +13,7 @@
 
 # Unit testing for the functions
 
-from agents_gallery.tools_agent.tools import flip_a_coin, roll_die
+from agents_gallery.tools_agent.tools.tools import flip_a_coin, roll_die
 
 
 def test_flip_a_coin_returns_heads_or_tails():

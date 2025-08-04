@@ -3,13 +3,14 @@ name = "adk-samples"
 version = "0.1"
 description = "C-SAW Agents Template"
 readme = "README.md"
-requires-python = "~=3.12"
+requires-python = ">=3.12.0, <3.13"
 dependencies = [
     "python-dotenv>=1.0.1",
-    "google-adk >= 1.4.2",
+    "google-adk >= 1.9.0",
     "praw>=7.8.1", #for Reddit Scout
     "yfinance>=0.2.55", #for Stock Agent
     "google-cloud-aiplatform[adk,agent-engines]>=1.98.0", #for deployment scripts
+    "google-cloud-secret-manager>=2.20.0", #for tools_agent and reddit_scout
     "nicegui>=2.16.0", #for web ui
     "google-api-core>=2.24.2", #for web ui helpers
 ]
