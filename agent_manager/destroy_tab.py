@@ -109,6 +109,10 @@ async def fetch_agents_for_destroy(
             def _prepare_destroy_list_details(agents_list):
                 details = []
                 for agent in agents_list:
+                    agent_dict = agent.to_dict()
+                    service_account = agent_dict.get("spec", {}).get(
+                        "serviceAccount", "N/A (Default AE Service Acct)"
+                    )
                     description_str = "No description."
                     if (
                         hasattr(agent, "_gca_resource")
@@ -121,6 +125,7 @@ async def fetch_agents_for_destroy(
                             "resource_name": agent.resource_name,
                             "display_name": agent.display_name,
                             "description": description_str,
+                            "service_account": service_account,
                             "create_time": agent.create_time.strftime(
                                 "%Y-%m-%d %H:%M:%S %Z"
                             )
@@ -159,6 +164,9 @@ async def fetch_agents_for_destroy(
                             ui.label(f"Resource: {resource_name}")
                             ui.label(
                                 f"Description: {agent_details['description']}"
+                            )
+                            ui.label(
+                                f"Service Account: {agent_details['service_account']}"
                             )
                             with ui.row().classes("gap-4 items-center"):
                                 ui.label(

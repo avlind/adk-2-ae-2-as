@@ -62,6 +62,7 @@ uv run adk web agents_gallery
         ],
         "local_env_file": "./agents_gallery/tools_agent/.env", #leave empty if not used
         "ae_display_name": "Name for Agent Engine Deployment",
+        "ae_service_acct": "serviceacctprincipal@projectid.iam.gserviceaccount.com",  #optional, leave blank to use default service account
         "as_display_name": "Name when deployed to Agentspace",
         "as_uri": "https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/query_stats/default/24px.svg", #icon to be used in Agentspace
         "description": "A description of your agent",

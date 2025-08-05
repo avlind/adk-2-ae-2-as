@@ -163,7 +163,7 @@ def create_deploy_tab(
             )
             return
 
-        with ui.dialog() as confirm_dialog, ui.card():
+        with ui.dialog() as confirm_dialog, ui.card().classes("min-w-[750px]"):
             ui.label("Confirm Agent Deployment").classes("text-xl font-bold")
             with ui.column().classes("gap-1 mt-2"):
                 ui.label("Agent Engine Project:").classes("font-semibold")
@@ -188,6 +188,10 @@ def create_deploy_tab(
             description_input = ui.textarea(
                 "Description", value=default_description
             ).props("outlined dense").classes("w-full mt-2")
+            default_service_account = agent_config.get("ae_service_acct", "")
+            service_account_input = ui.input(
+                "Custom Service Account (optional)", value=default_service_account
+            ).props("outlined dense").classes("w-full mt-2")
 
             ui.label("Proceed with deployment?").classes("mt-4")
             with ui.row().classes("mt-4 w-full justify-end"):
@@ -205,6 +209,7 @@ def create_deploy_tab(
                                 agent_config,
                                 display_name_input.value,
                                 description_input.value,
+                                service_account_input.value,
                                 deploy_button,
                                 deploy_status_area,
                             )
@@ -222,6 +227,7 @@ async def run_deployment_async(
     agent_config: dict,
     display_name: str,
     description: str,
+    service_account: str,
     deploy_button: ui.button,
     status_area: ui.column,
 ) -> None:
@@ -309,6 +315,8 @@ async def run_deployment_async(
     log_message_details = f"\n--- Deployment Details for {agent_name} ---\n"
     log_message_details += f"Display Name: {display_name}\n"
     log_message_details += f"Description: {description}\n"
+    if service_account:
+        log_message_details += f"Service Account: {service_account}\n"
     log_message_details += f"Requirements: {combined_requirements}\n"
     log_message_details += f"Extra Packages: {extra_packages}\n"
     if agent_env_vars:
@@ -336,14 +344,17 @@ async def run_deployment_async(
     try:
 
         def sync_create_agent():
-            return agent_engines.create(
-                adk_app,
-                requirements=combined_requirements,
-                extra_packages=extra_packages,
-                display_name=display_name,
-                description=description,
-                env_vars=agent_env_vars,
-            )
+            create_kwargs = {
+                "requirements": combined_requirements,
+                 "extra_packages": extra_packages,
+                "display_name": display_name,
+                "description": description,
+                "env_vars": agent_env_vars,
+            }
+            if service_account:
+                create_kwargs["service_account"] = service_account.strip()
+
+            return agent_engines.create(adk_app, **create_kwargs)
 
         remote_agent = await asyncio.to_thread(sync_create_agent)
     except Exception as e:

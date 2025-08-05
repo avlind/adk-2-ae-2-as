@@ -14,10 +14,10 @@ AGENT_CONFIGS = {
         ],
         "local_env_file": "./agents_gallery/tools_agent/.env", #leave empty if not used
         "ae_display_name": "Tools Demo Agent",
-        "ae_service_acct": "",  #omit to use default service account
+        "ae_service_acct": "agentengineuserserviceacct@csaw-workshop1.iam.gserviceaccount.com",  #omit to use default service account
         "as_display_name": "Tools Demo Agent",
         "description": "An agent demonstrating the use of various simple tools.",
-        "as_tool_description": "An agent demonstrating the use of various simple tools.",
+        "as_tool_description": "An agent demonstrating the use of various simple tools.", #optional, used by the default assistant of agentspace to know when to call this agent as an agent tool.
     },
     "recipe_finder": {
         "module_path": "agents_gallery.recipe_finder.agent",
@@ -32,6 +32,7 @@ AGENT_CONFIGS = {
         ],
         "local_env_file": "./agents_gallery/recipe_finder/.env", #leave empty if not used
         "ae_display_name": "Recipe Finder Demo Agent",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Recipe Finder in AS",
         "description": "An agent using vertex ai search datastore pointing to gcs bucket full of pdf files containing cooking recipes.",
     },
@@ -47,6 +48,7 @@ AGENT_CONFIGS = {
             "./agents_gallery/basic_agent",  # Path relative to where interactive_deploy.py is run
         ],
         "ae_display_name": "Basic Agent",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Basic Agent",
         "description": "An very basic LLM Agent",
         "as_tool_description": "An very basic LLM Agent",
@@ -63,6 +65,7 @@ AGENT_CONFIGS = {
             "./agents_gallery/loop_agent",  # Path relative to where interactive_deploy.py is run
         ],
         "ae_display_name": "Debate Team",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Debate Team",
         "description": "A Debate Team agent that demonstrates looping functionality within ADK",
         "as_tool_description": "A Debate Team agent that demonstrates looping functionality within ADK",
@@ -79,6 +82,7 @@ AGENT_CONFIGS = {
             "./agents_gallery/search_agent",  # Path relative to where interactive_deploy.py is run
         ],
         "ae_display_name": "Basic Search Agent",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Basic Search Agent for AS",
         "description": "A Simple LLM Agent empowered with Google Search Tools",
         "as_tool_description": "A Simple LLM Agent empowered with Google Search Tools",
@@ -97,6 +101,7 @@ AGENT_CONFIGS = {
             "./agents_gallery/reddit_scout",  # Path relative to where interactive_deploy.py is run
         ],
         "ae_display_name": "Reddit Scout",
+        "ae_service_acct": "",  #omit to use default service account
         "as_display_name": "Reddit Scout for Agentspace",
         "as_uri": "https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/article_person/default/24px.svg",
         "description": "A Reddit scout that searches for the most relevant posts in a given subreddit, or list of subreddits and surfaces them to the user in a conside and consumable manner.",

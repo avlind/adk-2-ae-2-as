@@ -25,7 +25,7 @@ from agent_manager.destroy_tab import create_destroy_tab
 from agent_manager.register_tab import create_register_tab
 from agent_manager.test_tab import create_test_tab
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 # --- Configuration Loading ---
 try:
