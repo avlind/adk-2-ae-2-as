@@ -1,0 +1,8 @@
+{
+  "excludedProjectEnvVars": ["GOOGLE_GENAI_USE_VERTEXAI","GOOGLE_CLOUD_LOCATION"],
+  "mcpServers": {
+    "context7": {
+      "httpUrl": "https://mcp.context7.com/mcp"
+    }
+  }
+}

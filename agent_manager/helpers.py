@@ -250,7 +250,7 @@ def create_authorization_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"CREATE_AUTHORIZATION_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}\nPayload: {json.dumps(logged_payload, indent=2)}"
+            f"CREATE_AUTHORIZATION_REQUEST:\nMethod: POST\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}\nPayload: {json.dumps(logged_payload, indent=2)}"
         )
 
         response = requests.post(url, headers=headers, json=payload)
@@ -298,7 +298,7 @@ def delete_authorization_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"DELETE_AUTHORIZATION_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
+            f"DELETE_AUTHORIZATION_REQUEST:\nMethod: DELETE\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
         )
 
         response = requests.delete(url, headers=headers)
@@ -345,7 +345,7 @@ def list_authorizations_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"LIST_AUTHORIZATIONS_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
+            f"LIST_AUTHORIZATIONS_REQUEST:\nMethod: GET\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
         )
 
         response = requests.get(url, headers=headers)
@@ -422,7 +422,7 @@ async def _fetch_vertex_ai_resources(
         resources_list = await asyncio.to_thread(fetch_and_convert_to_list)
 
         notification.spinner = False
-        notification.message = f"Found {len(resources_list)} {notify_prefix.lower()}."
+        notification.message = f"Found {len(resources_list)} {notify_prefix.lower()}.";
         logger.info(
             f"Found {len(resources_list)} {notify_prefix.lower()} in {ae_project_id}/{location}."
         )
@@ -985,7 +985,7 @@ def load_env_variables(relative_path: str) -> dict[str, str]:
 
                 # Remove surrounding quotes (single or double) from the value
                 if len(value) > 1 and ((value.startswith('"') and value.endswith('"')) or \
-                                       (value.startswith("'") and value.endswith("'"))):
+                                       (value.startswith("'') and value.endswith("'"))):
                     value = value[1:-1]
 
                 if key: # Ensure key is not empty

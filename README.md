@@ -1,7 +1,7 @@
 # **Disclaimer**
 > **Please be aware that the scripts and tools provided in this repository are offered "as-is" and for experimental/demonstration purposes. You use them at your own risk.**
 >
-> The Google Cloud Platform (GCP) APIs, particularly those related to Agent Engine and associated services, are subject to rapid changes and updates. While efforts are made to keep these samples current, **the functionality of the included deployment scripts and utilities is only tested and confirmed to work as of Jun 16, 2025.** Beyond this date, compatibility or functionality is not guaranteed without updates. Always refer to the official GCP documentation for the latest API specifications and best practices.
+> The Google Cloud Platform (GCP) APIs, particularly those related to Agent Engine and associated services, are subject to rapid changes and updates. While efforts are made to keep these samples current, **the functionality of the included deployment scripts and utilities is only tested and confirmed to work as of Aug 12, 2025.** Beyond this date, compatibility or functionality is not guaranteed without updates. Always refer to the official GCP documentation for the latest API specifications and best practices.
 
 # ADK Samples with Deployment Scripts
 
@@ -94,6 +94,24 @@ For a visual approach to managing your ADK agents deployed to Agent Engine, this
 | Manage AuthN | Configure OAuth Authorization for Agentspace, in order to use OAuth with Agent Engine hosted ADK agent. Only needed if ADK agent requires OAuth for its tools/functionality etc. |
 | Register | Register an ADK Agent on Agent Engine with an instance of Agentspace in your GCP Project |
 | Deregister | Deregister an ADK Agent on Agent Engine from an instance of Agentspace in your GCP Project |
+
+**Baseline IAM Requirements:**
+
+1. In order to register an agent to Agentspace, the user (of the account for which you are running the agent_manager.py through the Application Default Credentials) trying to register must have the `agents.manage` permission, which is part of the `Discovery Engine Admin` role.
+
+2. If you use a custom Service Account for Agent Engine, you must have the following baseline permissions to that service account:
+ 
+ - `Vertex AI User`
+ - `Storage Admin` 
+ - `Service Usage Consumer`
+ - `Cloud Trace Agent` (if tracing is enabled, which is it by default in this project and is the default when deploying with `adk`)
+ - Optional: Any other GCP permission that your Agent's tools may require, such as access to BigQuery or Secret Manager etc.
+
+>Note that the default service account for Agent Engine is listed as the "AI Platform Reasoning Engine Service Agent" and is a principal with an id of "service-<span style="color:red">PROJECT_NUMBER</span>@gcp-sa-aiplatform-re.iam.gserviceaccount.com" in the case you need to grant it additional permissions for tool calling etc.
+
+3. In order for Agentspace to interact with your Agent Engine instance, the Agentspace Service Account (service-<span style="color:red">PROJECT_NUMBER</span>@gcp-sa-discoveryengine.iam.gserviceaccount.com) must be granted the following permissions: 
+
+ - `Vertex AI User`
 
 
 ## Known Limitations
