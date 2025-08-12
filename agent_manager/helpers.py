@@ -250,7 +250,7 @@ def create_authorization_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"CREATE_AUTHORIZATION_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}\nPayload: {json.dumps(logged_payload, indent=2)}"
+            f"CREATE_AUTHORIZATION_REQUEST:\nMethod: POST\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}\nPayload: {json.dumps(logged_payload, indent=2)}"
         )
 
         response = requests.post(url, headers=headers, json=payload)
@@ -298,7 +298,7 @@ def delete_authorization_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"DELETE_AUTHORIZATION_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
+            f"DELETE_AUTHORIZATION_REQUEST:\nMethod: DELETE\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
         )
 
         response = requests.delete(url, headers=headers)
@@ -345,7 +345,7 @@ def list_authorizations_sync_webui(
             for k, v in headers.items()
         }
         logger.info(
-            f"LIST_AUTHORIZATIONS_REQUEST:\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
+            f"LIST_AUTHORIZATIONS_REQUEST:\nMethod: GET\nURL: {url}\nHeaders: {json.dumps(log_headers, indent=2)}"
         )
 
         response = requests.get(url, headers=headers)
@@ -426,7 +426,6 @@ async def _fetch_vertex_ai_resources(
         logger.info(
             f"Found {len(resources_list)} {notify_prefix.lower()} in {ae_project_id}/{location}."
         )
-        await asyncio.sleep(1.5)
         notification.dismiss()
         return resources_list, None
 
@@ -531,7 +530,7 @@ def register_agent_sync(
             for k, v in headers.items()
         }
         logger.info(
-            f"REGISTER_REQUEST:\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}\nPayload: {json.dumps(payload, indent=2)}"
+            f"REGISTER_REQUEST:\nMethod: POST\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}\nPayload: {json.dumps(payload, indent=2)}"
         )
 
         response = requests.post(
@@ -601,7 +600,7 @@ def get_all_agents_from_assistant_sync(
             for k, v in headers.items()
         }
         logger.info(
-            f"GET_ALL_AGENTS_REQUEST:\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}"
+            f"GET_ALL_AGENTS_REQUEST:\nMethod: GET\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}"
         )
 
         response = requests.get(api_endpoint, headers=headers)
@@ -672,7 +671,7 @@ def deregister_agent_sync(
             for k, v in headers.items()
         }
         logger.info(
-            f"DEREGISTER_AGENT_REQUEST:\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}"
+            f"DEREGISTER_AGENT_REQUEST:\nMethod: DELETE\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}"
         )
 
         response = requests.delete(api_endpoint, headers=headers)
@@ -757,6 +756,10 @@ def _fetch_matching_engines(project_number: str, locations: List[str] | str, acc
         "Content-Type": "application/json",
         "X-Goog-User-Project": project_number
     }
+    log_headers_masked = {
+        k: ("Bearer [token redacted]" if k == "Authorization" else v)
+        for k, v in headers.items()
+    }
 
     if isinstance(locations, list):
         location_list = [str(loc).strip() for loc in locations if str(loc).strip()]
@@ -775,7 +778,9 @@ def _fetch_matching_engines(project_number: str, locations: List[str] | str, acc
         api_endpoint = f"https://{api_host}/v1beta/projects/{project_number}/locations/{location}/collections/default_collection/engines"
 
         try:
-            logger.debug(f"Calling API: {api_endpoint}")
+            logger.info(
+                f"FETCH_ENGINES_REQUEST:\nMethod: GET\nURL: {api_endpoint}\nHeaders: {json.dumps(log_headers_masked, indent=2)}"
+            )
             response = requests.get(api_endpoint, headers=headers, timeout=30)
             response.raise_for_status()
 
@@ -897,7 +902,6 @@ async def fetch_agentspace_apps(
                 f"Found {len(agentspaces)} Agentspace app(s)."
             )
             notification.spinner = False
-            await asyncio.sleep(1.5)
 
     except Exception as e:
         msg = f"An unexpected error occurred while fetching Agentspace apps: {e}"
