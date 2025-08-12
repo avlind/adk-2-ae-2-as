@@ -988,8 +988,8 @@ def load_env_variables(relative_path: str) -> dict[str, str]:
                 value = value.strip() # Strip whitespace from the (potentially comment-stripped) value
 
                 # Remove surrounding quotes (single or double) from the value
-                if len(value) > 1 and ((value.startswith('"') and value.endswith('"')) or \
-                                       (value.startswith("'') and value.endswith("'"))):
+                if len(value) > 1 and ((value.startswith("\"") and value.endswith("\"")) or \
+                                       (value.startswith("'") and value.endswith("'"))):
                     value = value[1:-1]
 
                 if key: # Ensure key is not empty
