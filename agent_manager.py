@@ -22,6 +22,7 @@ from agent_manager.auth_tab import create_auth_tab
 from agent_manager.deploy_tab import create_deploy_tab
 from agent_manager.deregister_tab import create_deregister_tab
 from agent_manager.destroy_tab import create_destroy_tab
+from agent_manager.helpers import get_current_principal
 from agent_manager.register_tab import create_register_tab
 from agent_manager.test_tab import create_test_tab
 
@@ -187,7 +188,11 @@ async def main_page(client: Client):
                 )
 
             ui.element("div").classes("grow")
-            ui.html("Created by Aaron Lind<br>avlind@google.com").classes(
+            ui.html("Created by Aaron Lind<br>GitHub: avlind").classes(
+                "text-xs text-gray-500 dark:text-gray-400"
+            )
+            principal = await get_current_principal()
+            ui.html(f"<br>ADC Principal: {principal}").classes(
                 "text-xs text-gray-500 dark:text-gray-400"
             )
 

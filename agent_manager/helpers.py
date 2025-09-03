@@ -210,6 +210,27 @@ async def get_access_token_and_credentials_async_webui() -> (
 ):
     return await asyncio.to_thread(get_access_token_and_credentials_sync_webui)
 
+
+async def get_current_principal() -> str:
+    """Gets the current principal from the default credentials."""
+    _, credentials, error = await get_access_token_and_credentials_async_webui()
+    if error or not credentials:
+        return "Unknown"
+    if hasattr(credentials, "service_account_email") and credentials.service_account_email:
+        return credentials.service_account_email
+    if hasattr(credentials, "_service_account_email") and credentials._service_account_email:
+        return credentials._service_account_email
+    if hasattr(credentials, "id_token") and isinstance(credentials.id_token, str):
+        try:
+            from jose import jwt
+            decoded_token = jwt.get_unverified_claims(credentials.id_token)
+            return decoded_token.get("email", "Unknown")
+        except Exception as e:
+            logger.error(f"Error decoding id_token: {e}")
+    if hasattr(credentials, "client_id") and credentials.client_id:
+        return f"User: {credentials.client_id}"
+    return "Unknown"
+
 def create_authorization_sync_webui(
     target_project_id: str,
     target_project_number: str,
