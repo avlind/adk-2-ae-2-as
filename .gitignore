@@ -196,3 +196,5 @@ cython_debug/
 *.log*
 
 .DS_Store*
+
+!./agents_gallery/tools_agent/.env
