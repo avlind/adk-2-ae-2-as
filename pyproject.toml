@@ -13,6 +13,7 @@ dependencies = [
     "google-cloud-secret-manager>=2.20.0", #for tools_agent and reddit_scout
     "nicegui>=2.16.0", #for web ui
     "google-api-core>=2.24.2", #for web ui helpers
+    "python-jose>=3.3.0", #for web ui helpers
 ]
 
 [tool.ruff.lint]
