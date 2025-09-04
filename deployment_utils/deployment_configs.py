@@ -40,8 +40,8 @@ AGENT_CONFIGS = {
         "module_path": "agents_gallery.basic_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
         "requirements": [
-            "google-adk==1.10.0",
-            "google-cloud-aiplatform[adk, agent_engines]==1.108.0",
+            "google-adk==1.13.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.111.0",
             "python-dotenv",
         ],
         "extra_packages": [
