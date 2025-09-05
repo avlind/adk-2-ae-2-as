@@ -21,7 +21,7 @@ from .tools.tools import (
 )
 
 root_agent = Agent(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     name="simple_tools_agent",
     description="A helpful AI assistant. You can flip a coin, roll a die, list environment variables, or get secrets from Secret Manager.",
     instruction="""

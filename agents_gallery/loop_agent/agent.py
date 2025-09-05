@@ -36,7 +36,7 @@ def stop(reason: str, tool_context: ToolContext):
 
 affirmative_agent = Agent(
     name="affirmative_agent",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.5-flash",
     instruction="""
       You are the first speaker from the affirmative team in a debate.
       You are supportive to the topic.
@@ -52,7 +52,7 @@ affirmative_agent = Agent(
 
 opposition_agent = Agent(
     name="opposition_agent",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.5-flash",
     instruction="""
       You are the first speaker from the opposition team in a debate.
       You are against to the topic.
@@ -68,7 +68,7 @@ opposition_agent = Agent(
 
 judge_agent = Agent(
     name="judge_agent",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.5-flash",
     instruction="""
     You serve as the judge of a debate.
     Your job is to moderate the debate, ensuring that both sides have a fair
@@ -95,7 +95,7 @@ loop_agent = LoopAgent(
 
 root_agent = Agent(
     name="debate_host",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.5-flash",
     instruction=""""
         You are a debate host, your job is to extract from the user a debate topic for which the debate_team will then argure and judge a winner.
         If the user asks you can provide a few options that may be relevant.
