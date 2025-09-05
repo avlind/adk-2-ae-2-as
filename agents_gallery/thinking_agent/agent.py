@@ -12,14 +12,18 @@
 #  limitations under the License.
 
 from google.adk.agents import Agent
-from google.adk.tools import google_search
+from google.adk.planners import BuiltInPlanner
+from google.genai import types
 
 root_agent = Agent(
     model="gemini-2.5-flash",
-    name="search_agent",
-    description="A helpful AI assistant that can conduct a Google Search for you.",
-    instruction="""
-        Be polite and answer all users' questions.
-    """,
-    tools=[google_search],
+    name="root_agent",
+    planner=BuiltInPlanner(
+        thinking_config=types.ThinkingConfig(
+            include_thoughts=True,
+            thinking_budget=1024,
+        )
+    ),
+    description="A helpful AI assistant.",
+    instruction="Be polite and answer all users' questions.",
 )

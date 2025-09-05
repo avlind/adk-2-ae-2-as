@@ -14,7 +14,7 @@
 from google.adk.agents import Agent
 
 root_agent = Agent(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     name="root_agent",
     description="A helpful AI assistant.",
     instruction="Be polite and answer all users' questions.",

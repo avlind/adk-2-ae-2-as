@@ -145,7 +145,7 @@ def get_reddit_news(
 root_agent = Agent(
     name="reddit_scout",
     description="A Reddit Scout that searches for the most relevant posts in a given subreddit, or list of subreddits.",
-    model="gemini-2.0-flash-001",
+    model="gemini-2.5-flash",
     instruction=(
         "You are the Reddit News Scout. Your primary task is to fetch and present/top news from Reddit."
         "1. **Identify Intent:** Determine if the user is asking for news or related topics."
