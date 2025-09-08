@@ -14,7 +14,7 @@
 import asyncio
 import logging
 import traceback
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from nicegui import ui
 from vertexai import agent_engines
@@ -301,12 +301,12 @@ def create_test_tab(
                 f"Sending message to test agent: '{user_message_text}', session: {page_state['test_chat_session_id']}"
             )
 
-            def stream_and_aggregate_agent_response_sync_test():
+            def stream_and_parse_agent_response_sync_test() -> List[Dict[str, str]]:
                 agent_instance = page_state["test_remote_agent_instance"]
                 if not agent_instance:
                     raise Exception("Test remote agent instance not available.")
 
-                full_response_parts, all_events_received = [], []
+                response_parts, all_events_received = [], []
                 for event in agent_instance.stream_query(
                     message=user_message_text,
                     session_id=page_state["test_chat_session_id"],
@@ -319,29 +319,57 @@ def create_test_tab(
                         and event_content.get("role") == "model"
                     ):
                         for part in event_content.get("parts", []):
-                            if "text" in part and part["text"]:
-                                full_response_parts.append(part["text"])
+                            if part.get("thought"):
+                                response_parts.append(
+                                    {
+                                        "type": "thought",
+                                        "content": f"🤔: *{part.get('text', '')}*",
+                                    }
+                                )
+                            elif "text" in part and part["text"]:
+                                response_parts.append(
+                                    {"type": "text", "content": part["text"]}
+                                )
                     elif event.get("role") == "model":
                         for part in event.get("parts", []):
-                            if "text" in part and part["text"]:
-                                full_response_parts.append(part["text"])
-                if not full_response_parts:
+                            if part.get("thought"):
+                                response_parts.append(
+                                    {
+                                        "type": "thought",
+                                        "content": f"🤔: *{part.get('text', '')}*",
+                                    }
+                                )
+                            elif "text" in part and part["text"]:
+                                response_parts.append(
+                                    {"type": "text", "content": part["text"]}
+                                )
+
+                if not response_parts:
                     logger.warning(
                         f"Test agent stream_query no text parts. Events: {all_events_received}"
                     )
-                    return "Agent did not return a textual response."
-                return "".join(full_response_parts)
+                    return [
+                        {
+                            "type": "text",
+                            "content": "Agent did not return a textual response.",
+                        }
+                    ]
+                return response_parts
 
-            agent_response_text = await asyncio.to_thread(
-                stream_and_aggregate_agent_response_sync_test
+            agent_response_parts = await asyncio.to_thread(
+                stream_and_parse_agent_response_sync_test
             )
-            logger.info(f"Aggregated test agent response: {agent_response_text}")
+            logger.info(f"Aggregated test agent response parts: {agent_response_parts}")
             if thinking_message_container:
                 thinking_message_container.delete()
             with test_chat_messages_area:
-                ui.chat_message(
-                    str(agent_response_text), name=agent_display_name, sent=False
-                )
+                for part in agent_response_parts:
+                    ui.chat_message(
+                        str(part["content"]),
+                        name=agent_display_name,
+                        sent=False,
+                    )
+
         except Exception as e:
             logger.error(f"Error during test chat: {e}\n{traceback.format_exc()}")
             ui.notify(
