@@ -53,6 +53,23 @@ AGENT_CONFIGS = {
         "description": "An very basic LLM Agent",
         "as_tool_description": "An very basic LLM Agent",
     },
+    "thinking_agent": {
+        "module_path": "agents_gallery.thinking_agent.agent",
+        "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
+        "requirements": [
+            "google-adk==1.13.0",
+            "google-cloud-aiplatform[adk, agent_engines]==1.111.0",
+            "python-dotenv",
+        ],
+        "extra_packages": [
+            "./agents_gallery/thinking_agent",  # Path relative to where interactive_deploy.py is run
+        ],
+        "ae_display_name": "Thinking Agent",
+        "ae_service_acct": "",  #omit to use default service account
+        "as_display_name": "Thinking Agent",
+        "description": "An very basic thinking LLM Agent",
+        "as_tool_description": "An very basic thinking LLM Agent",
+    },
     "loop_agent": {
         "module_path": "agents_gallery.loop_agent.agent",
         "root_variable": "root_agent",  # root_agent is expected entrypoint for ADK
