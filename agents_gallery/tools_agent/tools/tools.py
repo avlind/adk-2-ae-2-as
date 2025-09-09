@@ -62,7 +62,8 @@ def list_environment_variables() -> dict[str, str]:
         it will not be included in the dictionary.
     """
     logger.info("Listing specific environment variables: variable1, variable2...")
-    specified_vars = ["VARIABLE1", "VARIABLE2"]
+    specified_vars = ["VARIABLE1"
+                      ,"VARIABLE2"]
     env_vars = {}
     for var_name in specified_vars:
         var_value = os.environ.get(var_name)
