@@ -25,8 +25,9 @@ from agent_manager.destroy_tab import create_destroy_tab
 from agent_manager.helpers import get_current_principal
 from agent_manager.register_tab import create_register_tab
 from agent_manager.test_tab import create_test_tab
+from agent_manager.update_tab import create_update_tab
 
-__version__ = "0.5"
+__version__ = "0.6"
 
 # --- Configuration Loading ---
 try:
@@ -203,6 +204,7 @@ async def main_page(client: Client):
 
     with ui.tabs().classes("w-full") as tabs:
         ui.tab("deploy", label="Deploy", icon="rocket_launch")
+        ui.tab("update", label="Update", icon="update")
         ui.tab("test", label="Test", icon="chat")
         ui.tab("destroy", label="Destroy", icon="delete_forever")
         ui.tab("agentspace_auth", label="Manage AuthN", icon="admin_panel_settings")
@@ -217,6 +219,7 @@ async def main_page(client: Client):
             bucket_input,
             AGENT_CONFIGS,
         )
+        create_update_tab(page_state, ae_project_input, location_select, bucket_input, AGENT_CONFIGS)
         create_test_tab(page_state, ae_project_input, location_select)
         create_destroy_tab(page_state, ae_project_input, location_select)
         create_auth_tab(page_state, as_project_input)
