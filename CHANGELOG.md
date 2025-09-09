@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2025-09-09
+### Added
+- New Feature: New Update Tab allows for the updating of a currently deployed ADK agent on Agent Engine, retaining the session history and resource name.
+
 ## [0.5.0] - 2025-07-22
 ### Added
 - New Feature: Support for custom service accounts for Agent Engines during deployment to better adhere to the principle of least privilege.
