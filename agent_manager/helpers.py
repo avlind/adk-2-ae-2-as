@@ -443,7 +443,7 @@ async def _fetch_vertex_ai_resources(
         resources_list = await asyncio.to_thread(fetch_and_convert_to_list)
 
         notification.spinner = False
-        notification.message = f"Found {len(resources_list)} {notify_prefix.lower()}.";
+        notification.message = f"Found {len(resources_list)} {notify_prefix.lower()}."
         logger.info(
             f"Found {len(resources_list)} {notify_prefix.lower()} in {ae_project_id}/{location}."
         )
@@ -812,27 +812,25 @@ def _fetch_matching_engines(project_number: str, locations: List[str] | str, acc
                 logger.info(f"No engines found in {location} under default_collection.")
                 continue
 
-            logger.info(f"Found {len(engines_in_response)} engine(s) in {location}. Checking for 'subscription_tier_search_and_assistant' tier...")
+            logger.info(f"Found {len(engines_in_response)} engine(s) in {location}. Checking for 'APP_TYPE_INTRANET' appType...")
             engines_matched_in_location = 0
             for engine in engines_in_response:
-                search_config = engine.get("searchEngineConfig")
-                retrieved_tier = search_config.get("requiredSubscriptionTier") if search_config else None
+                app_type = engine.get("appType")
 
-                if retrieved_tier and retrieved_tier.lower() == "subscription_tier_search_and_assistant":
+                if app_type == "APP_TYPE_INTRANET":
                         engines_matched_in_location += 1
                         engine_id = engine.get("name", "N/A").split('/')[-1]
-                        tier = search_config.get("requiredSubscriptionTier")
                         matching_engines_details.append({
                             "engine_id": engine_id,
                             "location": location,
-                            "tier": tier
+                            "appType": app_type
                         })
-                        logger.debug(f"  Match found - Engine ID: {engine_id}, Location: {location}, Tier: {tier}")
-                elif retrieved_tier:
-                    logger.debug(f"  Skipping engine {engine.get('name', 'N/A').split('/')[-1]} in {location} - Tier is '{retrieved_tier}' (not 'subscription_tier_search_and_assistant').")
+                        logger.info(f"  Match found - Engine ID: {engine_id}, Location: {location}, AppType: {app_type}")
+                else:
+                    logger.info(f"  Skipping engine {engine.get('name', 'N/A').split('/')[-1]} in {location} - AppType is '{app_type}' (not 'APP_TYPE_INTRANET').")
 
             if engines_matched_in_location == 0:
-                logger.info(f"No engines in {location} matched the requiredSubscriptionTier criteria.")
+                logger.info(f"No engines in {location} matched the appType criteria.")
 
         except requests.exceptions.Timeout:
              logger.warning(f"Timeout calling API for location {location}: {api_endpoint}")
@@ -850,6 +848,7 @@ def _fetch_matching_engines(project_number: str, locations: List[str] | str, acc
 
     return matching_engines_details
 
+
 def get_agentspace_apps_from_projectid(project_id: str, locations: List[str] | str = AGENTSPACE_DEFAULT_LOCATIONS) -> List[Dict[str, Any]]:
     try:
         credentials, access_token, _ = _get_auth_details(project_id_override=project_id)
@@ -860,7 +859,7 @@ def get_agentspace_apps_from_projectid(project_id: str, locations: List[str] | s
 
         matching_engines = _fetch_matching_engines(project_number, locations, access_token)
 
-        logger.info(f"Found {len(matching_engines)} engine(s) with tier 'subscription_tier_search_and_assistant'.")
+        logger.info(f"Found {len(matching_engines)} engine(s) with appType 'APP_TYPE_INTRANET'.")
         return matching_engines
 
     except DiscoveryEngineError as e:
