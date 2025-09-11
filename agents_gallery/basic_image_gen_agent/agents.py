@@ -15,8 +15,7 @@
 from google.adk import Agent
 from google.adk.tools import load_artifacts
 from google.adk.tools.tool_context import ToolContext
-from google.genai import Client
-from google.genai import types
+from google.genai import Client, types
 
 client = Client()
 
@@ -45,7 +44,7 @@ root_agent = Agent(
     model='gemini-2.5-flash',
     name='root_agent',
     description="""An agent that generates images and answer questions about the images.""",
-    instruction="""You are an agent whose job is to generate or edit an image based on the user's prompt. 
+    instruction="""You are an agent whose job is to generate or edit an image based on the user's prompt.
     When generating an image come up with a unique file name (e.g. filename.png) that the generate_image tool will use based on the users prompt.
     """,
     tools=[generate_image, load_artifacts],
