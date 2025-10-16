@@ -189,11 +189,11 @@ async def main_page(client: Client):
                 )
 
             ui.element("div").classes("grow")
-            ui.html("Created by Aaron Lind<br>GitHub: avlind").classes(
+            ui.html("Created by Aaron Lind<br>GitHub: avlind", sanitize=False).classes(
                 "text-xs text-gray-500 dark:text-gray-400"
             )
             principal = await get_current_principal()
-            ui.html(f"<br>ADC Principal: {principal}").classes(
+            ui.html(f"<br>ADC Principal: {principal}", sanitize=False).classes(
                 "text-xs text-gray-500 dark:text-gray-400"
             )
 

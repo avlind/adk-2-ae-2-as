@@ -420,7 +420,7 @@ def create_register_tab(
             register_status_area.clear()
             if success:
                 ui.html(
-                    f"<span class='text-green-600'>Success:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>"
+                    f"<span class='text-green-600'>Success:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>", sanitize=False
                 )
                 logger.info(f"Registration successful: {message}")
                 ui.notify(

@@ -5,15 +5,15 @@ description = "C-SAW Agents Template"
 readme = "README.md"
 requires-python = ">=3.13.0"
 dependencies = [
-    "python-dotenv>=1.0.1",
-    "google-adk >= 1.13.0",
+    "python-dotenv>=1.1.1",
+    "google-adk >= 1.16.0",
     "praw>=7.8.1", #for Reddit Scout
-    "yfinance>=0.2.55", #for Stock Agent
-    "google-cloud-aiplatform[adk,agent-engines]>=1.111.0", #for deployment scripts
-    "google-cloud-secret-manager>=2.20.0", #for tools_agent and reddit_scout
-    "nicegui>=2.16.0", #for web ui
-    "google-api-core>=2.24.2", #for web ui helpers
-    "python-jose>=3.3.0", #for web ui helpers
+    "yfinance>=0.2.66", #for Stock Agent
+    "google-cloud-aiplatform[adk,agent-engines]>=1.121.0", #for deployment scripts
+    "google-cloud-secret-manager>=2.25.0", #for tools_agent and reddit_scout
+    "nicegui>=3.0.4", #for web ui
+    "google-api-core>=2.26.0", #for web ui helpers
+    "python-jose>=3.5.0", #for web ui helpers
 ]
 
 [tool.ruff.lint]
@@ -22,9 +22,9 @@ ignore = ["E501", "W293", "E701", "E702"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.26.0",
-    "pytest-mock>=3.14.0",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "pytest-mock>=3.15.1",
 ]
 
 [tool.pytest.ini_options]
