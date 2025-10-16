@@ -166,7 +166,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                                 auth_create_status_area.clear()
                                 if success:
                                     ui.html(
-                                        f"<span class='text-green-600'>Success:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>"
+                                        f"<span class='text-green-600'>Success:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>", sanitize=False
                                     )
                                     ui.notify(
                                         "Authorization created successfully!",
@@ -180,7 +180,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
                                     auth_token_uri_input_el.set_value("")
                                 else:
                                     ui.html(
-                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>"
+                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{message}</pre>", sanitize=False
                                     )
                                     ui.notify(
                                         "Failed to create authorization.",
@@ -353,7 +353,7 @@ def create_auth_tab(page_state: Dict[str, Any], as_project_input: ui.input) -> N
 
                                 else:
                                     ui.html(
-                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{result}</pre>"
+                                        f"<span class='text-red-600'>Error:</span><pre class='mt-1 text-xs whitespace-pre-wrap'>{result}</pre>", sanitize=False
                                     )
                                     ui.notify(
                                         "Failed to list authorizations.",

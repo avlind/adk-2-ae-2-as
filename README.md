@@ -43,7 +43,7 @@ uv run adk web agents_gallery
 ```
 
 # Agent Setup for Deployment
-#### Deployment of ADK Agent to Agent Engine is accomplished via the `webui_manager.py` file. The script will prompt you through any inputs.
+#### Deployment of ADK Agent to Agent Engine is accomplished via the `agent_manager.py` file. The script will prompt you through any inputs.
 
 - Deployment script **WILL NOT** configure any GCP IAM Permissions for your Agent Engine hosted agent.
 - Deployment script assumes that your custom ADK agent is in a dedicated folder in under the `agents_gallery` directory. 

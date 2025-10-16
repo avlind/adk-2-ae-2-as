@@ -404,7 +404,7 @@ async def run_deployment_async(
                     "font-semibold mt-2 text-red-600"
                 )
                 ui.html(
-                    f"<pre class='text-xs p-2 bg-gray-100 dark:bg-gray-800 rounded overflow-auto'>{traceback.format_exc()}</pre>"
+                    f"<pre class='text-xs p-2 bg-gray-100 dark:bg-gray-800 rounded overflow-auto'>{traceback.format_exc()}</pre>", sanitize=False
                 )
                 ui.notify(
                     error_msg,
